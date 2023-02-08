@@ -1,6 +1,7 @@
 const Books = require("../models/Books");
 const Book = require("../models/Books");
 const LoanBook = require("../models/LoanBook");
+const Members = require("../models/Members");
 const Member = require("../models/Members");
 const Officer = require("../models/Officer");
 
@@ -34,30 +35,20 @@ module.exports = {
   peminjamanByUserId: async (req, res) => {
     // var idAuth = res.auth.id
     // console.log(req)
-    const loan = await LoanBook.find()
-      .populate("booksId")
-      .populate("memberId")
-      .populate("officerId");
-    const book = await Books.find();
-    const member = await Member.find();
-    const officer = await Officer.find();
-    const alertMessage = req.flash("alertMessage");
-    const alertStatus = req.flash("alertStatus");
-    const alert = { message: alertMessage, status: alertStatus };
-    const obj = {
-      loan,
-      book,
-      member,
-      officer,
-      alert,
-      title: "E-Library | Peminjaman Buku",
-      user: req.session.user,
-    }
-    console.log(req)
+    var username = req.params.username
+    const user = await LoanBook.findOne({ name: username });
     res.status(200).json({
-      obj
-    })
+      user,
+    });
 
+  },
+
+  checkMember: async (req, res) => {
+    var username = req.params.username
+    const user = await Members.findOne({ name: username });
+    res.status(200).json({
+      user,
+    });
   },
 
   memberPage: async (req, res) => {
