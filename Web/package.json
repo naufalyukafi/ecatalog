@@ -16,6 +16,7 @@
     "express-session": "^1.17.3",
     "fs-extra": "^10.1.0",
     "http-errors": "~1.6.3",
+    "jsonwebtoken": "^9.0.0",
     "method-override": "^3.0.0",
     "mongoose": "^6.7.2",
     "mongoose-seed": "^0.6.0",
