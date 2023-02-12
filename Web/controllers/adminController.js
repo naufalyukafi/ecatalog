@@ -8,6 +8,7 @@ const Users = require("../models/Users");
 const fs = require("fs-extra");
 const path = require("path");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 module.exports = {
   viewSignin: async (req, res) => {
@@ -31,30 +32,45 @@ module.exports = {
   actionSignin: async (req, res) => {
     try {
       const { username, password } = req.body;
-      const user = await Users.findOne({ username: username });
-      const pass = await Users.findOne({ password: password });
 
-      if (!user) {
-        req.flash("alertMessage", "User yang anda masukan tidak ada!!");
-        req.flash("alertStatus", "danger");
-        res.redirect("/admin/signin", {
-          alert,
-        });
-      }
-      if (!pass) {
-        req.flash("alertMessage", "Password yang anda masukan tidak cocok!!");
-        req.flash("alertStatus", "danger");
-        res.redirect("/admin/signin", {
-          alert,
-        });
-      }
+      Users.findOne({ username }, (err, user) => {
+        if (err) {
+          req.flash("alertMessage", "Password yang anda masukan tidak cocok!!");
+          req.flash("alertStatus", "danger");
+          res.redirect("/admin/signin", {
+            alert,
+          });
+        }
 
-      req.session.user = {
-        id: user.id,
-        username: user.username,
-      };
+        if (!user) {
+          req.flash("alertMessage", "User yang anda masukan tidak ada!!");
+          req.flash("alertStatus", "danger");
+          res.redirect("/admin/signin");
+        } else {
+          bcrypt.compare(password, user.password, (err, isMatch) => {
+            if (err) {
+              req.flash("alertMessage", "Internal server error!");
+              req.flash("alertStatus", "danger");;
+            }
 
-      res.redirect("/admin/dashboard");
+            if (!isMatch) {
+              req.flash("alertMessage", "Incorrect Password!");
+              req.flash("alertStatus", "danger");;
+            }
+            req.session.user = {
+              id: user.id,
+              username: user.username,
+            };
+            res.redirect("/admin/dashboard");
+
+          });
+        }
+
+
+
+      })
+
+
     } catch (error) {
       res.redirect("/admin/signin");
     }
@@ -121,16 +137,29 @@ module.exports = {
   },
   addMember: async (req, res) => {
     try {
-      const { nisn, name, kelas, tahun } = req.body;
-      await Member.create({
-        nisn,
-        name,
-        kelas,
-        tahun,
-      });
-      req.flash("alertMessage", "Success Add Anggota");
-      req.flash("alertStatus", "success");
-      res.redirect("/admin/member");
+      const { nisn, name, kelas, tahun, password, username } = req.body;
+      let salt = bcrypt.genSaltSync(10);
+      let hash = bcrypt.hashSync(password, salt);
+      await Member.findOne({ nisn }).then((data) => {
+        if (data) {
+          req.flash("alertMessage", "NISN Sudah digunakan");
+          req.flash("alertStatus", "danger");
+          res.redirect("/admin/member");
+        } else {
+          Member.create({
+            nisn,
+            name,
+            username,
+            kelas,
+            tahun,
+            password: hash
+          });
+          req.flash("alertMessage", "Success Add Anggota");
+          req.flash("alertStatus", "success");
+          res.redirect("/admin/member");
+        }
+      })
+
     } catch (error) {
       req.flash("alertMessage", `${error.message}`);
       req.flash("alertStatus", "danger");

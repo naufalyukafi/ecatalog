@@ -30,6 +30,14 @@ const loanSchema = new mongoose.Schema({
     type: ObjectId,
     ref: "Officer",
   },
+  status: {
+    type: String,
+    default: 'not-returned',
+  },
+  jumlah: {
+    type: Number,
+    required: true,
+  },
 });
 
 module.exports = mongoose.model("LoanBook", loanSchema);

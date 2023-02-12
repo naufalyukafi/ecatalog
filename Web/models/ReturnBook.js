@@ -17,6 +17,10 @@ const returnSchema = new mongoose.Schema({
     type: ObjectId,
     ref: "Officer",
   },
+  status: {
+    type: String,
+    default: 'not-returned',
+  }
 });
 
 module.exports = mongoose.model("ReturnBook", returnSchema);
