@@ -15,6 +15,8 @@ import { ApplicationProvider, IconRegistry } from '@ui-kitten/components';
 import { EvaIconsPack } from '@ui-kitten/eva-icons';
 import { default as theme } from '../custom-theme.json';
 import { AppNavigator } from './navigation/appnavigator';
+import { Provider } from 'react-redux';
+import store from './redux/store';
 
 const App = () => {
   LogBox.ignoreAllLogs();
@@ -22,7 +24,9 @@ const App = () => {
     <>
       <IconRegistry icons={EvaIconsPack} />
       <ApplicationProvider {...eva} theme={{ ...eva.light, ...theme }}>
-        <AppNavigator />
+        <Provider store={store}>
+          <AppNavigator />
+        </Provider>
       </ApplicationProvider>
     </>
   );

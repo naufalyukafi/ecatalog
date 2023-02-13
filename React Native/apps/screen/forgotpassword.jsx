@@ -8,14 +8,14 @@ import { Layout, Input, Icon, Button, useStyleSheet, Text } from '@ui-kitten/com
 // import SyncStorage from 'sync-storage';
 import { Logo } from '../resource';
 import { useDispatch, useSelector } from "react-redux";
-import { authLogin } from '../config/auth';
 import { login } from '../redux/userslice';
+import { authForgotPassword } from '../config/auth';
 
-const Login = ({ navigation }) => {
+const ForgotPassword = ({ navigation }) => {
     const user = useSelector((state) => state.user);
     const dispatch = useDispatch();
     const styles = useStyleSheet(themedStyles);
-    const [nisn, setNISN] = useState('')
+    const [NISN, setNISN] = useState('')
     const [password, setPassword] = useState('')
     const [secureTextEntry, setSecureTextEntry] = React.useState(true);
 
@@ -30,16 +30,16 @@ const Login = ({ navigation }) => {
     );
 
 
-    const clickLogin = () => {
-        authLogin({
-            nisn,
+    const clickForgotPassword = () => {
+        authForgotPassword({
+            nisn: NISN,
             password
         }).then(result => {
-            if (result.status == 200) {
-                dispatch(login(result.data.payload))
-                navigation.navigate('Home');
+            if (result.data.code === 501) {
+                alert(result.data.message)
             } else {
-                alert(result.error)
+                alert(result.data.message)
+                navigation.navigate('login')
             }
         }).catch(err => {
             alert(err)
@@ -54,38 +54,33 @@ const Login = ({ navigation }) => {
     return (
         <Layout style={styles.root} >
 
-            <View style={{ marginBottom: 35, justifyContent: 'center', alignItems: 'center' }}>
-                <Image width={39} height={39} source={Logo} />
+            <View style={{ marginBottom: 35, justifyContent: 'center', alignItems: 'center', width: '80%' }}>
+                <Text style={{ fontWeight: 'bold', fontSize: 29, textAlign: 'center' }}>Lupa Password</Text>
             </View>
             <View style={{ width: '80%' }}>
                 <Input
                     status='primary'
                     placeholder='NISN'
                     style={styles.input}
-                    value={nisn}
-                    size='large'
+                    value={NISN}
                     keyboardType='number-pad'
+
+                    size='large'
                     onChangeText={(e) => setNISN(e)}
                 />
                 <Input
                     secureTextEntry={secureTextEntry}
                     status='primary'
-                    placeholder='Password'
+                    placeholder='Password Baru'
                     style={styles.input}
                     value={password}
                     size='large'
                     onChangeText={(e) => setPassword(e)}
                     accessoryRight={renderIcon}
                 />
-                <TouchableOpacity onPress={() => navigation.navigate('forgot')}>
-                    <Text style={{ fontWeight: 'bold', textDecorationLine: 'underline', textAlign: 'right' }}>Lupa Password ?</Text>
-                </TouchableOpacity>
-                <Button style={styles.button} size='large' onPress={clickLogin}>Login</Button>
-                <View style={{ marginTop: 20, flexDirection: 'row', justifyContent: 'space-between' }}>
-                    <Text>Belum Punya Akun?</Text>
-                    <TouchableOpacity onPress={() => navigation
-                        .navigate('register')}><Text style={{ fontWeight: 'bold' }}>Daftar</Text></TouchableOpacity>
-                </View>
+                <Button style={styles.button} size='large' onPress={clickForgotPassword}>Reset Password</Button>
+                <TouchableOpacity onPress={() => navigation
+                    .navigate('login')}><Text style={{ textAlign: 'center', color: 'grey', fontSize: 16, marginTop: 10 }}>Kembali</Text></TouchableOpacity>
             </View>
         </Layout>
     );
@@ -102,12 +97,12 @@ const themedStyles = StyleSheet.create({
     input: {
         marginTop: 12,
         marginBottom: 12,
-        color: '#0D4C92'
+        color: 'blue'
     },
     button: {
         marginTop: 12,
-        backgroundColor: '#0D4C92'
+        backgroundColor: 'blue'
     }
 });
 
-export default Login;
+export default ForgotPassword;

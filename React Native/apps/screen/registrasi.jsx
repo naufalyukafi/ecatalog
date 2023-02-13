@@ -3,14 +3,21 @@ import {
     Image,
     StyleSheet, TouchableOpacity, TouchableWithoutFeedback, View,
 } from 'react-native';
-import { Layout, Text, Input, Icon, Button, useStyleSheet } from '@ui-kitten/components'
+import { Layout, Text, Input, Icon, Button, useStyleSheet, Datepicker } from '@ui-kitten/components'
 import urlApi from '../config/urlApi';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Logo } from '../resource';
+import { authRegister } from '../config/auth';
+import moment from 'moment';
 
 const Registrasi = ({ navigation }) => {
     const styles = useStyleSheet(themedStyles);
     const [NISN, setNISN] = useState('')
+    const [nama, setNama] = useState('')
+    const [username, setUsername] = useState('')
+    const [email, setEmail] = useState('')
+    const [classCourse, setClassCourse] = useState('')
+    const [year, setYear] = useState(new Date())
     const [password, setPassword] = useState('')
     const [secureTextEntry, setSecureTextEntry] = React.useState(true);
 
@@ -18,35 +25,35 @@ const Registrasi = ({ navigation }) => {
         setSecureTextEntry(!secureTextEntry);
     };
 
+
     const renderIcon = (props) => (
         <TouchableWithoutFeedback onPress={toggleSecureEntry}>
             <Icon {...props} name={secureTextEntry ? 'eye-off' : 'eye'} />
         </TouchableWithoutFeedback>
     );
 
-    const clickRegistrasi = (e) => {
-        e.preventDefault();
-        let data = new FormData();
-        data.append('NISN', NISN);
-        data.append('password', password);
-        fetch(urlApi + "/Registrasi", {
-            method: "POST",
-            body: data,
-        }).then(response => {
-            const statusCode = response.status;
-            const data = response.json();
-            return Promise.all([statusCode, data]);
-        }).then((result) => {
-            if (result[0] === 200) {
-                console.log(result[1].message);
-                AsyncStorage.setItem("@token", result[1].access_token);
-                console.log('token : ' + result[1].access_token);
+    const clickRegistrasi = () => {
+        authRegister({
+            name: nama,
+            username,
+            nisn: NISN,
+            email,
+            password,
+            kelas: classCourse,
+            tahun: moment(year).format('YYYY-MM-DD')
+        }).then(result => {
+            if (result.status == 200) {
+                alert('Anda berhasil mendaftarkan akun')
+                // dispatch(login(result.data.payload))
+                navigation.navigate('login');
             } else {
-                console.log(result[1].message);
+                alert(result.error)
             }
+        }).catch(err => {
+            alert(err)
+            console.error(err);
         });
     }
-
     return (
         <Layout style={styles.root} >
 
@@ -68,26 +75,39 @@ const Registrasi = ({ navigation }) => {
                     status='primary'
                     placeholder='Nama Lengkap'
                     style={styles.input}
-                    value={NISN}
+                    value={nama}
                     size='large'
-                    onChangeText={(e) => setNISN(e)}
+                    onChangeText={(e) => setNama(e)}
+                />
+
+                <Input
+                    status='primary'
+                    placeholder='Username'
+                    style={styles.input}
+                    value={username}
+                    size='large'
+                    onChangeText={(e) => setUsername(e)}
                 />
 
                 <Input
                     status='primary'
                     placeholder='Alamat email'
                     style={styles.input}
-                    value={NISN}
+                    value={email}
                     size='large'
-                    onChangeText={(e) => setNISN(e)}
+                    onChangeText={(e) => setEmail(e)}
                 />
                 <Input
                     status='primary'
                     placeholder='Kelas'
                     style={styles.input}
-                    value={NISN}
+                    value={classCourse}
                     size='large'
-                    onChangeText={(e) => setNISN(e)}
+                    onChangeText={(e) => setClassCourse(e)}
+                />
+                <Datepicker
+                    date={year}
+                    onSelect={nextDate => setYear(nextDate)}
                 />
                 <Input
                     secureTextEntry={secureTextEntry}
@@ -118,11 +138,11 @@ const themedStyles = StyleSheet.create({
     input: {
         marginTop: 12,
         marginBottom: 12,
-        color: 'blue'
+        color: '#0D4C92'
     },
     button: {
         marginTop: 12,
-        backgroundColor: 'blue'
+        backgroundColor: '#0D4C92'
     }
 });
 
