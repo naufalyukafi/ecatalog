@@ -30,7 +30,7 @@ const memberSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    default: 'user',
+    default: 'publik',
   }
 });
 

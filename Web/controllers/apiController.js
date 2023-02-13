@@ -89,7 +89,6 @@ module.exports = {
     });
   },
 
-
   putLoanBook: async (req, res) => {
     const { id, dateLoan, dateReturn, booksId, officerId } =
       req.body;
@@ -130,7 +129,7 @@ module.exports = {
 
   newReturnBook: async (req, res) => {
     const { dateReturn, booksId, idLoanBook, jumlah } = req.body;
-    console.log(jumlah)
+
     const newItem = {
       dateReturn,
       memberId: req.auth.id,
@@ -180,7 +179,7 @@ module.exports = {
 
   // auth
   registerUser: async (req, res) => {
-    const { nisn, username, password, role, email } = req.body;
+    const { nisn, username, password, email, name, tahun, kelas } = req.body;
     let salt = bcrypt.genSaltSync(10);
     let hash = bcrypt.hashSync(password, salt);
 
@@ -188,45 +187,49 @@ module.exports = {
       nisn === undefined ||
       username === undefined ||
       password === undefined ||
-      email === undefined
+      email === undefined ||
+      tahun === undefined ||
+      kelas === undefined
     ) {
       res.status(404).json({ message: "Lengkapi semua field" });
     }
-    await Users.findOne({ username }).then((data) => {
+    await Members.findOne({ username }).then((data) => {
       if (data) {
         res.status(200).send(createJSON(501, "Username Sudah digunakan", null))
       } else {
-        Users.create({
+        Members.create({
           nisn,
           email,
+          name,
+          tahun,
           username,
           password: hash,
-          role
-        }).then((resp) => {
-          res.status(200).send(createJSON(200, "Success register"))
-        });
+          kelas
+        }).then(() => {
+          res.status(200).send(createJSON(200, "Success register", null))
+        }).catch((err) => console.error(err))
 
       }
     })
   },
 
   loginUser: async (req, res) => {
-    const { username, password } = req.body;
+    const { nisn, password } = req.body;
 
     if (
-      username === undefined ||
+      nisn === undefined ||
       password === undefined
     ) {
       res.status(404).json({ message: "Lengkapi semua field" });
     }
 
-    Members.findOne({ username }, (err, user) => {
+    Members.findOne({ nisn }, (err, user) => {
       if (err) {
         return res.status(500).json({ error: 'Internal server error' });
       }
 
       if (!user) {
-        return res.status(401).json({ error: 'Incorrect username' });
+        return res.status(401).json({ error: 'Incorrect nisn' });
       }
 
       bcrypt.compare(password, user.password, (err, isMatch) => {
@@ -249,6 +252,22 @@ module.exports = {
         res.json({ payload: token });
       });
 
+    })
+  },
+
+  forgotPassword: async (req, res) => {
+    const { nisn, password } = req.body;
+    let salt = bcrypt.genSaltSync(10);
+    let hash = bcrypt.hashSync(password, salt);
+
+    await Members.findOne({ nisn }).then((data) => {
+      if (data) {
+        Members.findOneAndUpdate({ nisn }, { $set: { password: hash } }, { new: true }, () => {
+          res.status(200).send(createJSON(200, "Reset Password Success"))
+        });
+      } else {
+        res.status(200).send(createJSON(501, `NISN ${nisn} Tidak Ditemukan`, null))
+      }
     })
   },
 };

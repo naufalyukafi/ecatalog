@@ -27,12 +27,20 @@
                         <label for="tahun">Tahun Masuk</label>
                         <input type="date" class="form-control tahun" name="tahun" autocomplete="off" required>
                     </div>
+                    <div class="form-group">
+                        <label for="role">Role</label>
+                        <select class="form-control" name="role">
+                          <option>--- Pilih Role ---</option>
+                          <option value="member">Member</option>
+                          <option value="publik">Publik</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="modal-footer">
                     <input type="hidden" class="id" name="id">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Tambah Data</button>
+                    <button type="submit" class="btn btn-primary">Edit Member</button>
                 </div>
             </form>
         </div>

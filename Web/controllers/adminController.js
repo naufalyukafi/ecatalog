@@ -168,12 +168,13 @@ module.exports = {
   },
   editMember: async (req, res) => {
     try {
-      const { id, nisn, name, kelas, tahun } = req.body;
+      const { id, nisn, name, kelas, tahun, role } = req.body;
       const member = await Member.findOne({ _id: id });
       member.name = name;
       member.nisn = nisn;
       member.kelas = kelas;
       member.tahun = tahun;
+      member.role = role;
       await member.save();
       req.flash("alertMessage", "Success Edit Anggota");
       req.flash("alertStatus", "success");
