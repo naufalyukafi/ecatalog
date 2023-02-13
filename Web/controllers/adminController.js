@@ -32,45 +32,30 @@ module.exports = {
   actionSignin: async (req, res) => {
     try {
       const { username, password } = req.body;
+      const user = await Users.findOne({ username: username });
+      const pass = await Users.findOne({ password: password });
 
-      Users.findOne({ username }, (err, user) => {
-        if (err) {
-          req.flash("alertMessage", "Password yang anda masukan tidak cocok!!");
-          req.flash("alertStatus", "danger");
-          res.redirect("/admin/signin", {
-            alert,
-          });
-        }
+      if (!user) {
+        req.flash("alertMessage", "User yang anda masukan tidak ada!!");
+        req.flash("alertStatus", "danger");
+        res.redirect("/admin/signin", {
+          alert,
+        });
+      }
+      if (!pass) {
+        req.flash("alertMessage", "Password yang anda masukan tidak cocok!!");
+        req.flash("alertStatus", "danger");
+        res.redirect("/admin/signin", {
+          alert,
+        });
+      }
 
-        if (!user) {
-          req.flash("alertMessage", "User yang anda masukan tidak ada!!");
-          req.flash("alertStatus", "danger");
-          res.redirect("/admin/signin");
-        } else {
-          bcrypt.compare(password, user.password, (err, isMatch) => {
-            if (err) {
-              req.flash("alertMessage", "Internal server error!");
-              req.flash("alertStatus", "danger");;
-            }
+      req.session.user = {
+        id: user.id,
+        username: user.username,
+      };
 
-            if (!isMatch) {
-              req.flash("alertMessage", "Incorrect Password!");
-              req.flash("alertStatus", "danger");;
-            }
-            req.session.user = {
-              id: user.id,
-              username: user.username,
-            };
-            res.redirect("/admin/dashboard");
-
-          });
-        }
-
-
-
-      })
-
-
+      res.redirect("/admin/dashboard");
     } catch (error) {
       res.redirect("/admin/signin");
     }

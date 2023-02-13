@@ -141,7 +141,9 @@ module.exports = {
     // console.log(idLoanBook)
     await ReturnBook.create(newItem).then(() => {
       LoanBook.findOneAndUpdate({ _id: idLoanBook }, { $set: { status: 'returned', jumlah: (jumlah + 1) } }, { new: true }, () => {
-        res.status(200).send(createJSON(200, "Buku berhasil di kembalikan!"))
+        Books.findOneAndUpdate({ _id: booksId }, { $set: { jumlah: (jumlah + 1) } }, { new: true }, () => {
+          res.status(200).send(createJSON(200, "Buku berhasil di kembalikan!"))
+        })
       })
 
     });
